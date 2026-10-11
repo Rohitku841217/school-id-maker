@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#174ea6">
+  <title>School ID Card Maker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">ID</div>
+    <div>
+      <h1>School ID Card Maker</h1>
+      <p>विद्यार्थियों के पहचान पत्र बनाने का सॉफ्टवेयर</p>
+    </div>
+    <span class="offline-note">डेटा इसी ब्राउज़र में सेव होता है</span>
+  </header>
+
+  <main class="app-layout">
+    <aside class="panel editor">
+      <h2>स्कूल की जानकारी</h2>
+      <label for="school">स्कूल का नाम</label>
+      <input id="school" value="Sunrise Public School" maxlength="100">
+      <label for="address">स्कूल का पता</label>
+      <input id="address" value="Chanpatia, Bihar - 845306" maxlength="180">
+      <label for="session">शैक्षणिक सत्र</label>
+      <input id="session" value="2026-27" maxlength="20">
+      <label for="logoFile">स्कूल का लोगो</label>
+      <input id="logoFile" type="file" accept="image/*">
+      <div class="logo-row">
+        <img id="logoPreview" alt="School logo preview" hidden>
+        <button id="removeLogo" class="btn btn-light btn-small" type="button">लोगो हटाएँ</button>
+      </div>
+
+      <hr>
+      <h2 id="formHeading">विद्यार्थी की जानकारी</h2>
+      <form id="studentForm">
+        <input id="studentId" type="hidden">
+        <label for="sname">विद्यार्थी का नाम *</label>
+        <input id="sname" required maxlength="100" placeholder="जैसे: Aman Kumar">
+        <div class="two-cols">
+          <div><label for="sclass">कक्षा</label><input id="sclass" placeholder="8th - A" maxlength="30"></div>
+          <div><label for="sroll">रोल नंबर</label><input id="sroll" placeholder="23" maxlength="30"></div>
+        </div>
+        <div class="two-cols">
+          <div><label for="sdob">जन्मतिथि</label><input id="sdob" placeholder="12-05-2012" maxlength="30"></div>
+          <div><label for="smob">मोबाइल नंबर</label><input id="smob" inputmode="tel" placeholder="9876543210" maxlength="20"></div>
+        </div>
+        <label for="sfname">पिता/अभिभावक का नाम</label>
+        <input id="sfname" maxlength="100" placeholder="अभिभावक का नाम">
+        <label for="photoFile">विद्यार्थी की फोटो</label>
+        <input id="photoFile" type="file" accept="image/*">
+        <div class="photo-row">
+          <img id="photoPreview" alt="Student photo preview" hidden>
+          <button id="removePhoto" class="btn btn-light btn-small" type="button">फोटो हटाएँ</button>
+        </div>
+        <label for="template">कार्ड का रंग</label>
+        <select id="template">
+          <option value="blue">Blue — नीला</option>
+          <option value="red">Red — लाल</option>
+          <option value="green">Green — हरा</option>
+        </select>
+        <div class="button-row">
+          <button class="btn btn-primary" type="submit" id="saveStudent">कार्ड जोड़ें</button>
+          <button class="btn btn-light" type="button" id="resetForm">फॉर्म साफ़ करें</button>
+        </div>
+      </form>
+
+      <hr>
+      <h2>Excel से विद्यार्थी जोड़ें</h2>
+      <p class="help">Excel में Name, Class, Roll, DOB, Father, Mobile कॉलम रखें। फोटो अपने-आप Excel से नहीं आएगी।</p>
+      <a class="text-link" href="students-template.csv" download>नमूना CSV फाइल डाउनलोड करें</a>
+      <label for="excelFile">Excel / CSV फाइल</label>
+      <input id="excelFile" type="file" accept=".xlsx,.xls,.csv">
+      <button id="importExcel" class="btn btn-secondary" type="button">फाइल इम्पोर्ट करें</button>
+      <p id="importStatus" class="help" role="status"></p>
+      <hr>
+      <h2>डेटा और प्रिंट</h2>
+      <div class="button-stack">
+        <button id="printAll" class="btn btn-primary" type="button">सभी कार्ड प्रिंट / PDF</button>
+        <button id="exportCsv" class="btn btn-light" type="button">विद्यार्थियों का CSV डाउनलोड</button>
+        <button id="clearAll" class="btn btn-danger" type="button">सभी कार्ड हटाएँ</button>
+      </div>
+      <p class="help">प्रिंट बटन के बाद ब्राउज़र में Destination/Printer के रूप में “Save as PDF” चुन सकते हैं।</p>
+    </aside>
+
+    <section class="workspace">
+      <div class="workspace-heading">
+        <div>
+          <h2>विद्यार्थियों के ID कार्ड</h2>
+          <p id="countLabel">कुल 0 विद्यार्थी</p>
+        </div>
+        <input id="search" class="search" type="search" placeholder="नाम, कक्षा या रोल खोजें…" aria-label="विद्यार्थी खोजें">
+      </div>
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">🪪</div>
+        <h3>अभी कोई कार्ड नहीं है</h3>
+        <p>बाईं तरफ विद्यार्थी की जानकारी भरकर “कार्ड जोड़ें” दबाएँ।</p>
+      </div>
+      <div id="cardArea" class="card-grid"></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
